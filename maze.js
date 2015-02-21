@@ -274,7 +274,7 @@ var Maze = {
     Maze.resize();
 
     var Hammertime = new Hammer(Maze.canvas);
-	Hammertime.get('swipe').set({direction: Hammer.DIRECTION_ALL});
+	Hammertime.get('swipe').set({direction: Hammer.DIRECTION_ALL, threshold: 2, velocity: 0.1});
 	Hammertime.on('swipeleft', function(event) {
       if (Maze.mazeData[Maze.currentPointX][Maze.currentPointY].w) {
         Maze.path.push({x: Maze.currentPointX-1, y: Maze.currentPointY});
