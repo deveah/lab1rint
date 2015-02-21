@@ -116,13 +116,17 @@ var Maze = {
   */
   timeStarted: null,
 
-
   /*
    *  level number (doesn't reset when losing); used for tracking whether
    *  the maze should be traversed from the upper-left corner to the
    *  lower-right or otherwise
   */
   levelNumber: 0,
+
+  /*
+   *  used to keep track of on-screen debugging data
+  */
+  debugString: null,
 
   /*
    *  handles the 'mousedown' and 'touchstart' events, keeping track of the
@@ -235,6 +239,10 @@ var Maze = {
       }
     }
 
+    /*  update the on-screen debug string */
+    Maze.debugString = lengthX.toString() + ":" + lengthY.toString();
+	  
+
     /*  check if the maze endpoint has been reached */
     if (Maze.levelNumber % 2 == 0) {
       if (Maze.currentPointX == (Maze.mazeSize-1) &&
@@ -265,6 +273,8 @@ var Maze = {
 
     Maze.canvas.addEventListener('mousedown', Maze.mouseDownHandler);
     Maze.canvas.addEventListener('mouseup', Maze.mouseUpHandler);
+    Maze.canvas.addEventListener('touchstart', Maze.mouseDownHandler);
+    Maze.canvas.addEventListener('touchend', Maze.mouseUpHandler);
     Maze.canvas.addEventListener('touchmove', function(e) {
       e.preventDefault();
     }, false);
@@ -580,6 +590,9 @@ var Maze = {
     if (localStorage.getItem("highScore")) {
       Maze.ctx.fillText("Best: " + (localStorage.highScore).toString(), 10, 55);
     }
+
+	/*  draw the on-screen debugging string */
+	Maze.ctx.fillText(Maze.debugString, 10, 80);
   }
 };
 
