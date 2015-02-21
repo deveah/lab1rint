@@ -154,8 +154,8 @@ var Maze = {
       Maze.mouseStartX = event.clientX - Maze.canvas.offsetLeft;
       Maze.mouseStartY = event.clientY - Maze.canvas.offsetTop;
     } else if(event.type == "touchstart") {*/
-      Maze.mouseStartX = event.touches[0].screenX - Maze.canvas.offsetLeft;
-      Maze.mouseStartY = event.touches[0].screenY - Maze.canvas.offsetTop;
+      Maze.mouseStartX = event.touches[0].pageX - Maze.canvas.offsetLeft;
+      Maze.mouseStartY = event.touches[0].pageY - Maze.canvas.offsetTop;
     /*}*/
   },
 
@@ -183,10 +183,9 @@ var Maze = {
       currentX = event.clientX - Maze.canvas.offsetLeft;
       currentY = event.clientY - Maze.canvas.offsetTop;
     } else if(event.type == "touchend") {*/
-      currentX = event.touches[0].screenX - Maze.canvas.offsetLeft;
-      currentY = event.touches[0].screenY - Maze.canvas.offsetTop;  
+      currentX = event.touches[0].pageX - Maze.canvas.offsetLeft;
+      currentY = event.touches[0].pageY - Maze.canvas.offsetTop;  
     /*}*/
-	Maze.debugString = currentX.toString() + ":" + currentY.toString();
 
     /*  calculate the length of the movement on both axes */
     var lengthX = currentX - Maze.mouseStartX;
