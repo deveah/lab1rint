@@ -106,6 +106,9 @@ var Maze = {
   */
   animationFrame: 1.0,
 
+  /* TODO: DOC */
+  rotatingAngle: 0,
+
   /*
    *  true if in the title screen, false otherwise
   */
@@ -547,6 +550,9 @@ var Maze = {
     if (Maze.animationFrame < 1.0) {
       Maze.animationFrame += 0.02;
     }
+	if (Maze.animationFrame > 1.0) {
+	  Maze.animationFrame = 1.0;
+	}
     Maze.ctx.globalAlpha = Maze.animationFrame;
 
     /*  prepare the canvas to draw the maze layout */
@@ -593,6 +599,25 @@ var Maze = {
         }
       }
     } 
+
+    /*  highlight the destination square */
+	Maze.ctx.globalAlpha = 1.0 - Maze.animationFrame;
+	Maze.ctx.fillStyle = Maze.foregroundColor;
+	Maze.ctx.save();
+    if (Maze.levelNumber % 2 == 1) {
+	  Maze.ctx.translate(cellSize*0.5 + offsetRight, cellSize*0.5 + offsetTop);
+    } else {
+	  Maze.ctx.translate(cellSize*0.5 + offsetRight + cellSize*(Maze.mazeSize-1),
+	  	cellSize*0.5 + offsetTop + cellSize*(Maze.mazeSize-1));
+    }
+	Maze.ctx.rotate(Maze.rotatingAngle * Math.PI / 180);
+	Maze.ctx.fillRect(-cellSize/4, -cellSize/4, cellSize/2, cellSize/2);
+	Maze.ctx.restore();
+
+	Maze.rotatingAngle++;
+	if (Maze.rotatingAngle >= 360) {
+		Maze.rotatingAngle = 0;
+	}
 
     /*  draw the score, high score and time */
     Maze.ctx.globalAlpha = 1.0;
