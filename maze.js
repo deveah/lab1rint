@@ -124,43 +124,6 @@ var Maze = {
   levelNumber: 0,
 
   /*
-   *  used to keep track of on-screen debugging data
-  */
-  debugString: null,
-
-  /*
-   *  handles the 'mousedown' and 'touchstart' events, keeping track of the
-   *  origin of the motion event;
-   *  if in the title screen, jumps to normal game state
-  */
-  mouseDownHandler: function(event) {
-    'use strict';
-    event.preventDefault();
-
-    /*  transition from the title screen into the game */
-    if (Maze.inTitleScreen) {
-      Maze.inTitleScreen = false;
-      Maze.startGame();
-    }
-
-    /*  if the player is in the maze memorization phase, a mousedown
-     *  or touchstart event triggers nothing */
-    if (!Maze.memoryPhase) {
-      return;
-    }
-
-    /*  register motion start coordinates */
-    if (event.type == "mousedown") {
-      Maze.mouseStartX = event.clientX - Maze.canvas.offsetLeft;
-      Maze.mouseStartY = event.clientY - Maze.canvas.offsetTop;
-    } else if(event.type == "touchstart") {
-      Maze.mouseStartX = event.touches[0].pageX - Maze.canvas.offsetLeft;
-      Maze.mouseStartY = event.touches[0].pageY - Maze.canvas.offsetTop;
-    }
-  },
-
-
-  /*
    *  handles the 'mouseup' and 'touchend' events, registering a motion event
    *  and acting accordingly (moving inside the maze)
   */
@@ -176,22 +139,6 @@ var Maze = {
 
     /*  reset the animation frame */
     Maze.animationFrame = 0;
-
-	console.log("Event type: " + event.type);
-
-    /*  register the motion end */
-    var currentX, currentY;
-    if (event.type == "mouseup") {
-      currentX = event.clientX - Maze.canvas.offsetLeft;
-      currentY = event.clientY - Maze.canvas.offsetTop;
-    } else if(event.type == "touchend") {
-      currentX = event.touches[0].pageX - Maze.canvas.offsetLeft;
-      currentY = event.touches[0].pageY - Maze.canvas.offsetTop;
-    }
-
-    /*  calculate the length of the movement on both axes */
-    var lengthX = currentX - Maze.mouseStartX;
-    var lengthY = currentY - Maze.mouseStartY;
 
     /*  handles movement depending on the motion;
      *  if the motion is illegal (moving through a non-existant cell exit),
@@ -241,9 +188,6 @@ var Maze = {
       }
     }
 
-    /*  update the on-screen debug string */
-    Maze.debugString = lengthX.toString() + ":" + lengthY.toString();
-
     /*  check if the maze endpoint has been reached */
     if (Maze.levelNumber % 2 == 0) {
       if (Maze.currentPointX == (Maze.mazeSize-1) &&
@@ -256,6 +200,19 @@ var Maze = {
       }
     }
 
+  },
+
+  checkIfWon: function() {
+    if (Maze.levelNumber % 2 == 0) {
+      if (Maze.currentPointX == (Maze.mazeSize-1) &&
+          Maze.currentPointY == (Maze.mazeSize-1)) {
+        Maze.winner = true;
+      }
+    } else {
+      if (Maze.currentPointX == 0 && Maze.currentPointY == 0) {
+        Maze.winner = true;
+      }
+    }
   },
 
   /*
@@ -276,36 +233,56 @@ var Maze = {
     var Hammertime = new Hammer(Maze.canvas);
 	Hammertime.get('swipe').set({direction: Hammer.DIRECTION_ALL, threshold: 0, velocity: 0.0});
 	Hammertime.on('swipeleft', function(event) {
+	  if (!Maze.memoryPhase) {
+	    return;
+	  }
+	  Maze.animationFrame = 0;
       if (Maze.mazeData[Maze.currentPointX][Maze.currentPointY].w) {
         Maze.path.push({x: Maze.currentPointX-1, y: Maze.currentPointY});
         Maze.currentPointX -= 1;
       } else {
         Maze.loser = true;
       }
+	  Maze.checkIfWon();
 	});
 	Hammertime.on('swiperight', function(event) {
+	  if (!Maze.memoryPhase) {
+	    return;
+	  }
+	  Maze.animationFrame = 0;
       if (Maze.mazeData[Maze.currentPointX][Maze.currentPointY].e) {
         Maze.path.push({x: Maze.currentPointX+1, y: Maze.currentPointY});
         Maze.currentPointX += 1;
       } else {
         Maze.loser = true;
       }
+	  Maze.checkIfWon();
 	});
 	Hammertime.on('swipeup', function(event) {
+	  if (!Maze.memoryPhase) {
+	    return;
+	  }
+	  Maze.animationFrame = 0;
       if (Maze.mazeData[Maze.currentPointX][Maze.currentPointY].n) {
         Maze.path.push({x: Maze.currentPointX, y: Maze.currentPointY-1});
         Maze.currentPointY -= 1;
       } else {
         Maze.loser = true;
       }
+	  Maze.checkIfWon();
 	});
 	Hammertime.on('swipedown', function(event) {
+	  if (!Maze.memoryPhase) {
+	    return;
+	  }
+	  Maze.animationFrame = 0;
       if (Maze.mazeData[Maze.currentPointX][Maze.currentPointY].s) {
         Maze.path.push({x: Maze.currentPointX, y: Maze.currentPointY+1});
         Maze.currentPointY += 1;
       } else {
         Maze.loser = true;
       }
+	  Maze.checkIfWon();
 	});
 	Hammertime.on('tap', function(event) {
 	  if (Maze.inTitleScreen) {
@@ -314,10 +291,6 @@ var Maze = {
 	  }
 	});
 
-    /*Maze.canvas.addEventListener('mousedown', Maze.mouseDownHandler);*/
-    /*Maze.canvas.addEventListener('mouseup', Maze.mouseUpHandler);
-    /*Maze.canvas.addEventListener('touchstart', Maze.mouseDownHandler);
-    Maze.canvas.addEventListener('touchend', Maze.mouseUpHandler);*/
     Maze.canvas.addEventListener('touchmove', function(e) {
       e.preventDefault();
     }, false);
@@ -373,7 +346,7 @@ var Maze = {
   */
   loop: function() {
     'use strict';
-    setTimeout(Maze.loop, 10);
+    setTimeout(Maze.loop, 1);
     Maze.update();
     Maze.render();
   },
@@ -633,9 +606,6 @@ var Maze = {
     if (localStorage.getItem("highScore")) {
       Maze.ctx.fillText("Best: " + (localStorage.highScore).toString(), 10, 55);
     }
-
-	/*  draw the on-screen debugging string */
-	Maze.ctx.fillText(Maze.debugString, 10, 80);
   }
 };
 
