@@ -186,6 +186,7 @@ var Maze = {
       currentX = event.touches[0].screenX - Maze.canvas.offsetLeft;
       currentY = event.touches[0].screenY - Maze.canvas.offsetTop;  
     /*}*/
+	Maze.debugString = currentX.toString() + ":" + currentY.toString();
 
     /*  calculate the length of the movement on both axes */
     var lengthX = currentX - Maze.mouseStartX;
@@ -240,7 +241,7 @@ var Maze = {
     }
 
     /*  update the on-screen debug string */
-    Maze.debugString = lengthX.toString() + ":" + lengthY.toString();
+    /*Maze.debugString = lengthX.toString() + ":" + lengthY.toString();*/
 
     /*  check if the maze endpoint has been reached */
     if (Maze.levelNumber % 2 == 0) {
