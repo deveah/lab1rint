@@ -265,8 +265,6 @@ var Maze = {
 
     Maze.canvas.addEventListener('mousedown', Maze.mouseDownHandler);
     Maze.canvas.addEventListener('mouseup', Maze.mouseUpHandler);
-    Maze.canvas.addEventListener('touchstart', Maze.mouseDownHandler);
-    Maze.canvas.addEventListener('touchend', Maze.mouseUpHandler);
     Maze.canvas.addEventListener('touchmove', function(e) {
       e.preventDefault();
     }, false);
