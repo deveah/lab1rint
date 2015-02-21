@@ -274,7 +274,7 @@ var Maze = {
     Maze.resize();
 
     var Hammertime = new Hammer(Maze.canvas);
-	Hammertime.get('swipe').set({direction: Hammer.DIRECTION_ALL, threshold: 2, velocity: 0.1});
+	Hammertime.get('swipe').set({direction: Hammer.DIRECTION_ALL, threshold: 0, velocity: 0.0});
 	Hammertime.on('swipeleft', function(event) {
       if (Maze.mazeData[Maze.currentPointX][Maze.currentPointY].w) {
         Maze.path.push({x: Maze.currentPointX-1, y: Maze.currentPointY});
@@ -307,8 +307,14 @@ var Maze = {
         Maze.loser = true;
       }
 	});
+	Hammertime.on('tap', function(event) {
+	  if (Maze.inTitleScreen) {
+	    Maze.inTitleScreen = false;
+		Maze.startGame();
+	  }
+	});
 
-    Maze.canvas.addEventListener('mousedown', Maze.mouseDownHandler);
+    /*Maze.canvas.addEventListener('mousedown', Maze.mouseDownHandler);*/
     /*Maze.canvas.addEventListener('mouseup', Maze.mouseUpHandler);
     /*Maze.canvas.addEventListener('touchstart', Maze.mouseDownHandler);
     Maze.canvas.addEventListener('touchend', Maze.mouseUpHandler);*/
