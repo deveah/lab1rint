@@ -264,6 +264,7 @@ var Maze = {
   */
   init: function() {
     'use strict';
+
     Maze.canvas = document.getElementById('mainCanvas');
     Maze.ctx = Maze.canvas.getContext('2d');
     Maze.ratio = Maze.width / Maze.height;
@@ -272,10 +273,45 @@ var Maze = {
 
     Maze.resize();
 
+    var Hammertime = new Hammer(Maze.canvas);
+	Hammertime.get('swipe').set({direction: Hammer.DIRECTION_ALL});
+	Hammertime.on('swipeleft', function(event) {
+      if (Maze.mazeData[Maze.currentPointX][Maze.currentPointY].w) {
+        Maze.path.push({x: Maze.currentPointX-1, y: Maze.currentPointY});
+        Maze.currentPointX -= 1;
+      } else {
+        Maze.loser = true;
+      }
+	});
+	Hammertime.on('swiperight', function(event) {
+      if (Maze.mazeData[Maze.currentPointX][Maze.currentPointY].e) {
+        Maze.path.push({x: Maze.currentPointX+1, y: Maze.currentPointY});
+        Maze.currentPointX += 1;
+      } else {
+        Maze.loser = true;
+      }
+	});
+	Hammertime.on('swipeup', function(event) {
+      if (Maze.mazeData[Maze.currentPointX][Maze.currentPointY].n) {
+        Maze.path.push({x: Maze.currentPointX, y: Maze.currentPointY-1});
+        Maze.currentPointY -= 1;
+      } else {
+        Maze.loser = true;
+      }
+	});
+	Hammertime.on('swipedown', function(event) {
+      if (Maze.mazeData[Maze.currentPointX][Maze.currentPointY].s) {
+        Maze.path.push({x: Maze.currentPointX, y: Maze.currentPointY+1});
+        Maze.currentPointY += 1;
+      } else {
+        Maze.loser = true;
+      }
+	});
+
     Maze.canvas.addEventListener('mousedown', Maze.mouseDownHandler);
-    Maze.canvas.addEventListener('mouseup', Maze.mouseUpHandler);
-    Maze.canvas.addEventListener('touchstart', Maze.mouseDownHandler);
-    Maze.canvas.addEventListener('touchend', Maze.mouseUpHandler);
+    /*Maze.canvas.addEventListener('mouseup', Maze.mouseUpHandler);
+    /*Maze.canvas.addEventListener('touchstart', Maze.mouseDownHandler);
+    Maze.canvas.addEventListener('touchend', Maze.mouseUpHandler);*/
     Maze.canvas.addEventListener('touchmove', function(e) {
       e.preventDefault();
     }, false);
