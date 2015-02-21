@@ -240,7 +240,7 @@ var Maze = {
     }
 
     /*  update the on-screen debug string */
-    /*Maze.debugString = lengthX.toString() + ":" + lengthY.toString();*/
+    Maze.debugString = lengthX.toString() + ":" + lengthY.toString();
 
     /*  check if the maze endpoint has been reached */
     if (Maze.levelNumber % 2 == 0) {
