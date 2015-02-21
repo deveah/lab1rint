@@ -150,13 +150,13 @@ var Maze = {
     }
 
     /*  register motion start coordinates */
-    /*if (event.type == "mousedown") {
+    /*if (event.type == "mousedown") {*/
       Maze.mouseStartX = event.clientX - Maze.canvas.offsetLeft;
       Maze.mouseStartY = event.clientY - Maze.canvas.offsetTop;
-    } else if(event.type == "touchstart") {*/
+    /*} else if(event.type == "touchstart") {
       Maze.mouseStartX = event.touches[0].pageX - Maze.canvas.offsetLeft;
       Maze.mouseStartY = event.touches[0].pageY - Maze.canvas.offsetTop;
-    /*}*/
+    }*/
   },
 
 
@@ -179,13 +179,13 @@ var Maze = {
 
     /*  register the motion end */
     var currentX, currentY;
-    /*if (event.type == "mouseup") {
+    /*if (event.type == "mouseup") {*/
       currentX = event.clientX - Maze.canvas.offsetLeft;
       currentY = event.clientY - Maze.canvas.offsetTop;
-    } else if(event.type == "touchend") {*/
+    /*} else if(event.type == "touchend") {
       currentX = event.touches[0].pageX - Maze.canvas.offsetLeft;
-      currentY = event.touches[0].pageY - Maze.canvas.offsetTop;  
-    /*}*/
+      currentY = event.touches[0].pageY - Maze.canvas.offsetTop;
+    }*/
 
     /*  calculate the length of the movement on both axes */
     var lengthX = currentX - Maze.mouseStartX;
@@ -270,10 +270,10 @@ var Maze = {
 
     Maze.resize();
 
-    /*Maze.canvas.addEventListener('mousedown', Maze.mouseDownHandler);
-    Maze.canvas.addEventListener('mouseup', Maze.mouseUpHandler);*/
-    Maze.canvas.addEventListener('touchstart', Maze.mouseDownHandler);
-    Maze.canvas.addEventListener('touchend', Maze.mouseUpHandler);
+    Maze.canvas.addEventListener('mousedown', Maze.mouseDownHandler);
+    Maze.canvas.addEventListener('mouseup', Maze.mouseUpHandler);
+    /*Maze.canvas.addEventListener('touchstart', Maze.mouseDownHandler);
+    Maze.canvas.addEventListener('touchend', Maze.mouseUpHandler);*/
     Maze.canvas.addEventListener('touchmove', function(e) {
       e.preventDefault();
     }, false);
