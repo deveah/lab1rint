@@ -46,6 +46,11 @@ var Maze = {
   selectColor: "rgb(255, 255, 255)",
 
   /*
+   *  which typeface to use when drawing text
+  */
+  font: "Montserrat",
+
+  /*
    *  style of the line that makes the maze's edges
   */
   mazeLineWidth: 10,
@@ -109,7 +114,7 @@ var Maze = {
   /*
    *  current animation frame (0.0 .. 1.0)
   */
-  animationFrame: 1.0,
+  animationFrame: 0.0,
 
   /*
    *  the angle of the little rotating square that indicates the player's
@@ -118,9 +123,10 @@ var Maze = {
   rotatingAngle: 0,
 
   /*
-   *  true if in the title screen, false otherwise
+   *  the screen that the user currently is in;
+   *  can be one of: "title", "help", or "game"
   */
-  inTitleScreen: true,
+  currentScreen: "title",
 
   /*
    *  time since the beginnning of the current game
@@ -133,85 +139,6 @@ var Maze = {
    *  lower-right or otherwise
   */
   levelNumber: 0,
-
-  /*
-   *  handles the 'mouseup' and 'touchend' events, registering a motion event
-   *  and acting accordingly (moving inside the maze)
-  */
-  mouseUpHandler: function(event) {
-    'use strict';
-    event.preventDefault();
-
-    /*  if the player is in the maze memorization phase, a mouseup
-     *  or touchend event triggers nothing */
-    if (!Maze.memoryPhase) {
-      return;
-    }
-
-    /*  reset the animation frame */
-    Maze.animationFrame = 0;
-
-    /*  handles movement depending on the motion;
-     *  if the motion is illegal (moving through a non-existant cell exit),
-     *  then trigger a losing event;
-     *  if the motion is legal, push the new coordinates on the player's
-     *  path
-    */
-    if (Math.abs(lengthX) > Math.abs(lengthY)) {
-      /*  horizontal movement */
-      if (lengthX > 0) {
-        /*  right movement */
-        if (Maze.mazeData[Maze.currentPointX][Maze.currentPointY].e) {
-          Maze.path.push({x: Maze.currentPointX+1, y: Maze.currentPointY});
-          Maze.currentPointX += 1;
-        } else {
-          Maze.loser = true;
-        }
-      }
-      if (lengthX < 0) {
-        /*  left movement */
-        if (Maze.mazeData[Maze.currentPointX][Maze.currentPointY].w) {
-          Maze.path.push({x: Maze.currentPointX-1, y: Maze.currentPointY});
-          Maze.currentPointX -= 1;
-        } else {
-          Maze.loser = true;
-        }
-      }
-    } else {
-      /*  vertical movement */
-      if (lengthY > 0) {
-        /*  down movement */
-        if (Maze.mazeData[Maze.currentPointX][Maze.currentPointY].s) {
-          Maze.path.push({x: Maze.currentPointX, y: Maze.currentPointY+1});
-          Maze.currentPointY += 1;
-        } else {
-          Maze.loser = true;
-        }
-      }
-      if (lengthY < 0) {
-        /*  up movement */
-        if (Maze.mazeData[Maze.currentPointX][Maze.currentPointY].n) {
-          Maze.path.push({x: Maze.currentPointX, y: Maze.currentPointY-1});
-          Maze.currentPointY -= 1;
-        } else {
-          Maze.loser = true;
-        }
-      }
-    }
-
-    /*  check if the maze endpoint has been reached */
-    if (Maze.levelNumber % 2 == 0) {
-      if (Maze.currentPointX == (Maze.mazeSize-1) &&
-          Maze.currentPointY == (Maze.mazeSize-1)) {
-        Maze.winner = true;
-      }
-    } else {
-      if (Maze.currentPointX == 0 && Maze.currentPointY == 0) {
-        Maze.winner = true;
-      }
-    }
-
-  },
 
   /*
    *  checks if the player has reached the other end of the maze, in which
@@ -244,6 +171,8 @@ var Maze = {
     Maze.canvas.height = Maze.height;
 
     Maze.resize();
+
+    Maze.setRandomColorScheme();
 
     var Hammertime = new Hammer(Maze.canvas);
     
@@ -278,6 +207,11 @@ var Maze = {
     });
     
     Hammertime.on('swipeup', function(event) {
+      if (Maze.currentScreen == "title") {
+        Maze.currentScreen = "help";
+        Maze.animationFrame = 0;
+      }
+
       if (!Maze.memoryPhase) {
         return;
       }
@@ -292,6 +226,15 @@ var Maze = {
     });
   
     Hammertime.on('swipedown', function(event) {
+      if (Maze.currentScreen == "title") {
+        Maze.currentScreen = "game";
+        Maze.startGame();
+      }
+      if (Maze.currentScreen == "help") {
+        Maze.currentScreen = "title";
+        Maze.animationFrame = 0;
+      }
+
       if (!Maze.memoryPhase) {
         return;
       }
@@ -303,13 +246,6 @@ var Maze = {
         Maze.loser = true;
       }
       Maze.checkIfWon();
-    });
-
-    Hammertime.on('tap', function(event) {
-      if (Maze.inTitleScreen) {
-        Maze.inTitleScreen = false;
-      Maze.startGame();
-      }
     });
 
     Maze.canvas.addEventListener('touchmove', function(e) {
@@ -382,7 +318,7 @@ var Maze = {
     /*
      *  if the player is in the title screen, discard state updates
     */
-    if (Maze.inTitleScreen) {
+    if (Maze.currentScreen != "game") {
       return;
     }
 
@@ -421,7 +357,7 @@ var Maze = {
       /*  and set a timeout to exit out of it */
       setTimeout(function() {
         Maze.memoryPhase = true;
-    Maze.animationFrame = 0.0;
+        Maze.animationFrame = 0.0;
       }, Maze.memoryTime);
 
       /*  save highscore */
@@ -473,7 +409,7 @@ var Maze = {
       /*  and set a timeout to exit out of it */
       setTimeout(function() {
         Maze.memoryPhase = true;
-    Maze.animationFrame = 0.0;
+        Maze.animationFrame = 0.0;
       }, Maze.memoryTime);
 
       /*  save highscore */
@@ -489,10 +425,10 @@ var Maze = {
     }
 
     /*  there's a time limit imposed on completing each level;
-   *  when the time is up, the player loses */
-  if (Maze.maxTime - Date.now() + Maze.timeStarted <= 0) {
-    Maze.loser = true;
-  }
+     *  when the time is up, the player loses */
+    if (Maze.maxTime - Date.now() + Maze.timeStarted <= 0) {
+      Maze.loser = true;
+    }
   },
 
   /*
@@ -535,39 +471,134 @@ var Maze = {
     'use strict';
 
     /*  clear the canvas */
-    Maze.ctx.clearRect(0, 0, Maze.canvas.width, Maze.canvas.height);
-    Maze.ctx.fillStyle = "black";
+    Maze.ctx.fillStyle = Maze.selectColor;
+    Maze.ctx.fillRect(0, 0, Maze.canvas.width, Maze.canvas.height);
     
+    Maze.animationFrame += 0.01;
+    if (Maze.animationFrame > 1.0) {
+      Maze.animationFrame = 1.0;
+    }
+    Maze.ctx.globalAlpha = Maze.animationFrame;
+
     /*  draw the game title */
-    Maze.ctx.font = "36px Open Sans";
-    Maze.ctx.fillText("Lab1rint", 30, 172);
+    Maze.ctx.fillStyle = Maze.backgroundColor;
+    Maze.ctx.font = "36px " + Maze.font;
+    Maze.ctx.fillText("Lab1rint", 60, 180);
 
     /*  draw the game authors */
-    Maze.ctx.font = "14px Open Sans";
-    Maze.ctx.fillText("(c) 2015, Vlad Dumitru & Cosmin Istudor", 30, 190);
+    Maze.ctx.font = "14px " + Maze.font;
+    Maze.ctx.fillText("(c) 2015, Vlad Dumitru & Cosmin Istudor", 30, 194);
 
     /*  draw a minimal on-screen help */
-    Maze.ctx.fillText("Apasă și tu pe ecran, ceva.", 30, 390);
+    Maze.ctx.fillStyle = Maze.foregroundColor;
+    Maze.ctx.fillText("Swipe up for help.", 30, 390);
+    Maze.ctx.fillText("Swipe down to start.", 30, 404);
+
+    /*  draw a little rotating square */
+    Maze.ctx.globalAlpha = Math.abs(Math.sin(Maze.rotatingAngle * Math.PI / 180));
+    Maze.ctx.save();
+    Maze.ctx.translate(45, 168);
+    Maze.ctx.rotate(Maze.rotatingAngle * Math.PI / 180);
+    Maze.ctx.fillRect(-10, -10, 20, 20);
+    Maze.ctx.restore();
+
+    Maze.rotatingAngle++;
+    if (Maze.rotatingAngle >= 360) {
+      Maze.rotatingAngle = 0;
+    }
+
+    Maze.ctx.globalAlpha = 1.0;
   },
 
   /*
-   *  draws the main game scren
+   *  renders the help screen, containing the basic info for the user
+   *  to be able to start playing
+  */
+  renderHelpScreen: function() {
+    'use strict';
+
+    /*  clear the canvas */
+    Maze.ctx.fillStyle = Maze.selectColor;
+    Maze.ctx.fillRect(0, 0, Maze.canvas.width, Maze.canvas.height);
+    
+    Maze.animationFrame += 0.01;
+    if (Maze.animationFrame > 1.0) {
+      Maze.animationFrame = 1.0;
+    }
+    Maze.ctx.globalAlpha = Maze.animationFrame;
+
+    /*  draw the game title */
+    Maze.ctx.fillStyle = Maze.foregroundColor;
+    Maze.ctx.font = "36px " + Maze.font;
+    Maze.ctx.fillText("Lab1rint", 60, 180);
+
+    /*  draw the game authors */
+    Maze.ctx.font = "14px " + Maze.font;
+    Maze.ctx.fillText("(c) 2015, Vlad Dumitru & Cosmin Istudor", 30, 194);
+
+    /*  draw the instructions */
+    Maze.ctx.fillStyle = Maze.backgroundColor;
+    Maze.ctx.fillText("The objective of the game is", 30, 240);
+    Maze.ctx.fillText("traversing each maze from memory,", 30, 254);
+    Maze.ctx.fillText("reaching the little rotating square", 30, 268);
+    Maze.ctx.fillText("without hitting any walls.", 30, 282);
+    Maze.ctx.fillText("You move throughout the maze", 30, 320);
+    Maze.ctx.fillText("by swiping in the direction", 30, 334);
+    Maze.ctx.fillText("that you want to move in.", 30, 348);
+
+    Maze.ctx.fillText("Swipe down to return to", 30, 390);
+    Maze.ctx.fillText("the title screen.", 30, 404);
+    
+    /*  draw a little rotating square */
+    Maze.ctx.fillStyle = Maze.foregroundColor;
+    Maze.ctx.globalAlpha = Math.abs(Math.sin(Maze.rotatingAngle * Math.PI / 180));
+    Maze.ctx.save();
+    Maze.ctx.translate(45, 168);
+    Maze.ctx.rotate(Maze.rotatingAngle * Math.PI / 180);
+    Maze.ctx.fillRect(-10, -10, 20, 20);
+    Maze.ctx.restore();
+
+    Maze.rotatingAngle++;
+    if (Maze.rotatingAngle >= 360) {
+      Maze.rotatingAngle = 0;
+    }
+
+    Maze.ctx.globalAlpha = 1.0;
+  },
+
+  /*
+   *  main render function; it dispatches the rendering event to other functions,
+   *  depending on which screen the user is currently in
   */
   render: function() {
     'use strict';
 
+    switch (Maze.currentScreen) {
+    case "title":
+      Maze.renderTitleScreen();
+      return;
+    case "game":
+      Maze.renderGameScreen();
+      return;
+    case "help":
+      Maze.renderHelpScreen();
+      return;
+    default:
+      console.log("bug");
+    }
+  },
+
+  /*
+   *  game render function, responsible with keeping the screen up to date with
+   *  various data related to the game state
+  */
+  renderGameScreen: function () {
     /*  these values are needed to center the maze on the screen; their
      *  frame-by-frame calculation is needed in case the canvas is resized
      *  between frames */
     var cellSize = 50;
     var offsetTop = (Maze.height - cellSize*Maze.mazeSize) / 2;
     var offsetRight = (Maze.width - cellSize*Maze.mazeSize) / 2;
-
-    /*  if in the title screen state, jump to it */
-    if (Maze.inTitleScreen) {
-      Maze.renderTitleScreen();
-      return;
-    }
 
     /*  clear the canvas surface with the background color */
     Maze.ctx.fillStyle = Maze.selectColor;
@@ -588,9 +619,9 @@ var Maze = {
     if (Maze.animationFrame < 1.0) {
       Maze.animationFrame += 0.02;
     }
-  if (Maze.animationFrame > 1.0) {
-    Maze.animationFrame = 1.0;
-  }
+    if (Maze.animationFrame > 1.0) {
+      Maze.animationFrame = 1.0;
+    }
     Maze.ctx.globalAlpha = Maze.animationFrame;
 
     /*  prepare the canvas to draw the maze layout */
@@ -639,32 +670,32 @@ var Maze = {
     } 
 
     /*  highlight the destination square */
-  if (Maze.memoryPhase) {
-    Maze.ctx.globalAlpha = 1.0 - Maze.animationFrame;
-  } else {
-    Maze.ctx.globalAlpha = 1.0;
-  }
-  Maze.ctx.fillStyle = Maze.foregroundColor;
-  Maze.ctx.save();
-    if (Maze.levelNumber % 2 == 1) {
-    Maze.ctx.translate(cellSize*0.5 + offsetRight, cellSize*0.5 + offsetTop);
+    if (Maze.memoryPhase) {
+      Maze.ctx.globalAlpha = 1.0 - Maze.animationFrame;
     } else {
-    Maze.ctx.translate(cellSize*0.5 + offsetRight + cellSize*(Maze.mazeSize-1),
-      cellSize*0.5 + offsetTop + cellSize*(Maze.mazeSize-1));
+      Maze.ctx.globalAlpha = 1.0;
     }
-  Maze.ctx.rotate(Maze.rotatingAngle * Math.PI / 180);
-  Maze.ctx.fillRect(-cellSize/4, -cellSize/4, cellSize/2, cellSize/2);
-  Maze.ctx.restore();
+    Maze.ctx.fillStyle = Maze.foregroundColor;
+    Maze.ctx.save();
+    if (Maze.levelNumber % 2 == 1) {
+      Maze.ctx.translate(cellSize*0.5 + offsetRight, cellSize*0.5 + offsetTop);
+    } else {
+      Maze.ctx.translate(cellSize*0.5 + offsetRight + cellSize*(Maze.mazeSize-1),
+        cellSize*0.5 + offsetTop + cellSize*(Maze.mazeSize-1));
+    }
+    Maze.ctx.rotate(Maze.rotatingAngle * Math.PI / 180);
+    Maze.ctx.fillRect(-cellSize/4, -cellSize/4, cellSize/2, cellSize/2);
+    Maze.ctx.restore();
 
     /*  rotate the little destination square */
-  Maze.rotatingAngle++;
-  if (Maze.rotatingAngle >= 360) {
-    Maze.rotatingAngle = 0;
-  }
+    Maze.rotatingAngle++;
+    if (Maze.rotatingAngle >= 360) {
+      Maze.rotatingAngle = 0;
+    }
 
     /*  draw the score, high score and time */
     Maze.ctx.globalAlpha = 1.0;
-    Maze.ctx.font = "20px Open Sans";
+    Maze.ctx.font = "20px " + Maze.font;
     Maze.ctx.fillStyle = Maze.backgroundColor;
     Maze.ctx.fillText("Score: " + Maze.score, 10, 30);
 
