@@ -221,7 +221,9 @@ var Maze = {
         return;
       }
       Maze.animationFrame = 0;
-      if (Maze.mazeData[Maze.currentPointX][Maze.currentPointY].w) {
+			if (Maze.currentPointX - 1 < 0) {
+				/*	nothing */
+      } else if (Maze.mazeData[Maze.currentPointX][Maze.currentPointY].w) {
         Maze.path.push({x: Maze.currentPointX-1, y: Maze.currentPointY});
         Maze.currentPointX -= 1;
       } else {
@@ -235,7 +237,9 @@ var Maze = {
         return;
       }
       Maze.animationFrame = 0;
-      if (Maze.mazeData[Maze.currentPointX][Maze.currentPointY].e) {
+			if (Maze.currentPointX + 1 >= Maze.mazeSize) {
+				/*	nothing */
+      } else if (Maze.mazeData[Maze.currentPointX][Maze.currentPointY].e) {
         Maze.path.push({x: Maze.currentPointX+1, y: Maze.currentPointY});
         Maze.currentPointX += 1;
       } else {
@@ -254,7 +258,9 @@ var Maze = {
         return;
       }
       Maze.animationFrame = 0;
-      if (Maze.mazeData[Maze.currentPointX][Maze.currentPointY].n) {
+			if (Maze.currentPointY - 1 < 0) {
+				/*	nothing */
+      } else if (Maze.mazeData[Maze.currentPointX][Maze.currentPointY].n) {
         Maze.path.push({x: Maze.currentPointX, y: Maze.currentPointY-1});
         Maze.currentPointY -= 1;
       } else {
@@ -277,7 +283,9 @@ var Maze = {
         return;
       }
       Maze.animationFrame = 0;
-      if (Maze.mazeData[Maze.currentPointX][Maze.currentPointY].s) {
+			if (Maze.currentPointY + 1 > Maze.mazeSize) {
+				/*	nothing */
+      } else if (Maze.mazeData[Maze.currentPointX][Maze.currentPointY].s) {
         Maze.path.push({x: Maze.currentPointX, y: Maze.currentPointY+1});
         Maze.currentPointY += 1;
       } else {
